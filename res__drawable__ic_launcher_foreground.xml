@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- anello dorato quasi completo: il tempo che passa -->
+    <path
+        android:pathData="M54,28 A26,26 0 1,1 28,54"
+        android:fillColor="#00000000"
+        android:strokeColor="#D4AF6A"
+        android:strokeWidth="5"
+        android:strokeLineCap="round" />
+
+    <!-- punto luminoso alla fine dell'anello -->
+    <path
+        android:pathData="M28,54 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0"
+        android:fillColor="#F1D9A0" />
+
+    <!-- foglia al centro: il benessere -->
+    <path
+        android:pathData="M54,71 C42.5,63.5 42.5,49.5 54,39 C65.5,49.5 65.5,63.5 54,71 Z"
+        android:fillColor="#5FD0C0" />
+
+    <!-- nervatura della foglia -->
+    <path
+        android:pathData="M54,70 L54,52"
+        android:fillColor="#00000000"
+        android:strokeColor="#0B1220"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round" />
+</vector>
