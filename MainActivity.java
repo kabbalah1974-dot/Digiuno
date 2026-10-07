@@ -416,6 +416,54 @@ public class MainActivity extends Activity {
             });
             setupBox.addView(off, Ui.full(8));
         }
+        setupBox.addView(linkRow(), Ui.full(14));
+    }
+
+    /** Interruttore del collegamento con Passi: vale solo per il digiuno in corso o per quello che stai per iniziare. */
+    private View linkRow() {
+        LinearLayout row = new LinearLayout(this);
+        row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setGravity(Gravity.CENTER_VERTICAL);
+        boolean installed = PassiLink.installed(this);
+        String label = installed
+            ? "Collega Passi per questo digiuno (calorie e passi veri)"
+            : "Passi non è installata: collegamento non disponibile";
+        row.addView(Ui.text(this, label, 13, installed ? Ui.TEXT : Ui.MUTED), new LinearLayout.LayoutParams(0, WRAP, 1f));
+        if (installed) {
+            Switch sw = new Switch(this);
+            sw.setChecked(store.linkOn());
+            sw.setOnCheckedChangeListener(new android.widget.CompoundButton.OnCheckedChangeListener() {
+                @Override public void onCheckedChanged(android.widget.CompoundButton b, boolean on) {
+                    store.setLink(on);
+                    if (on) toast("Collegamento acceso: i dati si vedono nella scheda Corpo. Si spegne da solo a fine digiuno.");
+                }
+            });
+            row.addView(sw);
+        }
+        return row;
+    }
+
+    private boolean wantLink() { return store.fasting() && store.linkOn(); }
+
+    private String linkLine() {
+        if (loadingHealth) return "Leggo i dati di Passi…";
+        if (health == null) return "Collegamento con Passi acceso.";
+        switch (health.linkState) {
+            case 1:
+                String s = health.linkSampleMs > 0
+                    ? "Dati di Passi: ultimo aggiornamento alle " + new SimpleDateFormat("HH:mm", Locale.ITALY).format(new Date(health.linkSampleMs)) + "."
+                    : "Dati di Passi ricevuti.";
+                if (!health.linkSensorOk) {
+                    s += " Passi non ha il permesso «Attività fisica»: aprila e consentilo, così conta i passi.";
+                }
+                return s;
+            case 2:
+                return "Passi non è installata su questo telefono.";
+            case 4:
+                return "Apri Passi una volta e inserisci i tuoi dati.";
+            default:
+                return "Passi non risponde. Aprila una volta e poi tocca Aggiorna.";
+        }
     }
 
     private void askOffset() {
@@ -600,7 +648,10 @@ public class MainActivity extends Activity {
     }
 
     private void onConnectPressed() {
-        if (!HealthSync.supported()) return;
+        if (!HealthSync.supported()) {
+            loadHealth(false);
+            return;
+        }
         if (HealthSync.allGranted(this)) {
             loadHealth(false);
         } else {
@@ -609,7 +660,8 @@ public class MainActivity extends Activity {
     }
 
     private void loadHealth(final boolean fillProfile) {
-        if (!HealthSync.supported() || loadingHealth) return;
+        final boolean link = wantLink();
+        if ((!HealthSync.supported() && !link) || loadingHealth) return;
         loadingHealth = true;
         renderBody();
         final long start = store.fasting() ? store.startMs() : 0;
@@ -617,6 +669,7 @@ public class MainActivity extends Activity {
         bg.execute(new Runnable() {
             @Override public void run() {
                 final HealthData d = HealthSync.read(app, start);
+                if (link) PassiLink.fill(app, d, start);
                 handler.post(new Runnable() {
                     @Override public void run() {
                         loadingHealth = false;
@@ -643,6 +696,10 @@ public class MainActivity extends Activity {
                 + "Questo telefono ha una versione più vecchia: l'app funziona lo stesso, ma senza i dati di Samsung Health. "
                 + "La stima usa peso, altezza ed età del tuo profilo.";
             showConnect = false;
+            if (wantLink()) {
+                showConnect = true;
+                connectLabel = "Aggiorna da Passi";
+            }
         } else if (loadingHealth) {
             status = "Sto leggendo i dati…";
         } else if (health == null) {
@@ -661,6 +718,7 @@ public class MainActivity extends Activity {
             status = "Collegato. Dati letti alle " + new SimpleDateFormat("HH:mm", Locale.ITALY).format(new Date(healthTimeMs)) + ".";
             connectLabel = "Aggiorna dati";
         }
+        if (wantLink()) status += "\n\n" + linkLine();
         connText.setText(status);
         connBtn.setText(connectLabel);
         connBtn.setVisibility(showConnect ? View.VISIBLE : View.GONE);
@@ -716,7 +774,7 @@ public class MainActivity extends Activity {
                     used = true;
                 }
             }
-            if (used) src = "calorie lette da Samsung Health";
+            if (used) src = "calorie lette da " + (health.kcalSource != null ? health.kcalSource : "Samsung Health");
         }
         double rate = Ketosis.effectiveRate(rest, active);
         double dep = Ketosis.depletionHours(rate);

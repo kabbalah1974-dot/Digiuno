@@ -51,7 +51,11 @@ final class Store {
             .apply();
     }
 
-    void endFast() { p.edit().putBoolean("fasting", false).apply(); }
+    /** Alla fine del digiuno anche il collegamento con Passi si spegne: va riacceso ogni volta. */
+    void endFast() { p.edit().putBoolean("fasting", false).putBoolean("linkOn", false).apply(); }
+
+    boolean linkOn() { return p.getBoolean("linkOn", false); }
+    void setLink(boolean on) { p.edit().putBoolean("linkOn", on).apply(); }
 
     double elapsedHours(long nowMs) {
         if (!fasting()) return 0;

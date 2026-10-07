@@ -13,6 +13,12 @@
     <uses-permission android:name="android.permission.health.READ_ACTIVE_CALORIES_BURNED" />
     <uses-permission android:name="android.permission.health.READ_TOTAL_CALORIES_BURNED" />
 
+    <!-- Collegamento facoltativo con l'app Passi -->
+    <queries>
+        <package android:name="it.passi.app" />
+        <provider android:authorities="it.passi.app.data" />
+    </queries>
+
     <application
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"

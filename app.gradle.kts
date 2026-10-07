@@ -11,7 +11,7 @@ android {
         minSdk = 26
         targetSdk = 34
         versionCode = providers.gradleProperty("verCode").orNull?.toIntOrNull() ?: 1
-        versionName = "1.0"
+        versionName = "1.1"
     }
 
     // Stessa firma a ogni costruzione: senza, Android rifiuta gli aggiornamenti ("firma in conflitto").

@@ -45,6 +45,10 @@ final class HealthData {
     Long sleepMsLast24h;
     Double activeKcalSinceStart;
     Double totalKcalSinceStart;
+    String kcalSource;      // "Passi" quando le calorie arrivano dal collegamento
+    int linkState;          // 0 non richiesto, 1 ok, 2 Passi non installata, 3 nessuna risposta, 4 profilo mancante in Passi
+    boolean linkSensorOk = true;
+    long linkSampleMs;
 
     boolean hasAnything() {
         return heightCm != null || weightKg != null || lastBpm != null || stepsToday != null
